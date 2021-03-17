@@ -121,7 +121,7 @@
 		border: 1px groove black;
 	}
 
-	#controls button:active {
+	button:active {
 		border-style: ridge;
 	}
 </style>
