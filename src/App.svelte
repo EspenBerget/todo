@@ -74,7 +74,7 @@
 	}
 
 	.todo {
-		border: 1px solid black;
+		border: 1px groove black;
 		border-radius: 5px;
 
 		width: 50vw;
@@ -99,6 +99,7 @@
 
 	.done {
 		background-color: hsl(240, 1%, 53%);
+		border-style: ridge;
 	}
 
 	.todo button {
