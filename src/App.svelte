@@ -1,57 +1,58 @@
 <script>
+
+	import { onMount } from "svelte";
+	import TodoItem from './TodoItem.svelte';
 	import { fade } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
-	import { onMount } from "svelte";
-
-	let items = []; 
-	let uid = 0;
-	let todoText;
 
 	const duration = 200; // 200ms animation/transition duration
 
+	let keys = []; 
+	let genKey = 0;
+
 	onMount(() => {
-		 const store = localStorage.getItem('items');
-		 const storeIx = localStorage.getItem('ix');
-		 items = store !== null ? JSON.parse(store) : [];
-		 uid = storeIx !== null ? JSON.parse(storeIx) : 0;
+		const storeKeys = localStorage.getItem("keys");
+		const storeGenKey = localStorage.getItem("genKey");
+		keys = storeKeys ? JSON.parse(storeKeys) : [];
+		genKey = storeGenKey ? JSON.parse(storeGenKey) : 0;
 	});
 
 	function save() {
-		localStorage.setItem('items', JSON.stringify(items));
-		localStorage.setItem('ix', uid);
+		localStorage.setItem("keys", JSON.stringify(keys));
 	}
 
 	function clear() {
 		const ok = prompt("Type 'clear all' to delete");
 		if (ok === 'clear all') {
-			items = [];
+			keys = [];
 			localStorage.clear();
 		}
 	}
 
-	function remove(id) {
-		items = items.filter(item => item.id !== id);
+	function remove(filterKey) {
+		keys = keys.filter(key => key.id !== filterKey);
 		save();
 	}
 
-	window.onkeypress = ev => {
-		if (ev.key === 'Enter' && todoText !== "" && todoText !== undefined) {
-			items = [{id: uid++, text: todoText, done: false}, ...items];	
-			todoText = "";
-			save();
-		}
+	function newItem() {
+		keys = [{id: genKey++}, ...keys];	
+		console.log(keys);
+		console.log(genKey);
+		save();
 	}
 </script>
 
 <main>
-	<input id="textfield" bind:value={todoText} placeholder="new task?" />
-	{#each items as item (item.id)}
-		<label class='todo' class:done={item.done} out:fade={{duration: duration / 2}} animate:flip={{ duration: duration }}>
-			<input type="checkbox" bind:checked={item.done} on:change={save}>
-			{item.text}
-			<button on:click={() => remove(item.id)}>X</button>
-		</label>
-	{/each}
+	<button id="new" on:click={newItem}>New</button>
+	<div class="container">
+		{#each keys as key (key.id)}
+		<div animate:flip={{duration}} out:fade={{duration}}>
+		<TodoItem key={key.id}>
+			<button on:click|stopPropagation={() => remove(key.id)}>X</button>
+		</TodoItem>
+		</div>
+		{/each}
+	</div>
 	<button id="clear" on:click={clear}>Clear</button>
 </main>
 
@@ -68,48 +69,20 @@
 		background-color: rgb(208, 201, 201);
 	}
 
-	#textfield {
-		margin: 1rem;
-		width: 50vw;
+	.container {
+		overflow-y: scroll;
+		flex-grow: 2;
 	}
 
-	.todo {
-		border: 1px groove black;
-		border-radius: 5px;
-
-		width: 50vw;
-
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-
-		padding: 0;
-		padding-left: 0.3rem;
-		padding-right: 0.3rem;
-
-		background-color: hsl(240, 9%, 93%);
-
-		user-select: none;
-		margin: 0.2rem;
-	}
-
-	.todo button, .todo input {
-		margin: 1rem;
-	}
-
-	.done {
-		background-color: hsl(240, 1%, 53%);
-		border-style: ridge;
-	}
-
-	.todo button {
-		color: crimson;
-		background: none;
-		border: none;
-	} 
-
-	button:hover {
+	button {
 		cursor: pointer;
+		margin: 0;
+	}
+
+	#new {
+		margin-top: 1rem;
+		background-color: lightblue;
+		border: 1px groove black;
 	}
 
 	#clear {
@@ -120,9 +93,5 @@
 		background-color: crimson;
 		color: white;
 		border: 1px groove black;
-	}
-
-	button:active {
-		border-style: ridge;
 	}
 </style>
